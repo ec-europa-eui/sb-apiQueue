@@ -3,6 +3,9 @@ import { Store } from '@ngrx/store';
 import { getUserState, UserState } from '@eui/core';
 import { Observable, Subscription } from 'rxjs';
 import { I18nService } from '@eui/core';
+import { ApiQueueService } from '@eui/core';
+
+import { EuiAllModule } from '@eui/components';
 
 @Component({
     selector: 'app-root',
@@ -14,9 +17,10 @@ export class AppComponent implements OnDestroy {
     userState: Observable<UserState>;
     // an array to keep all subscriptions and easily unsubscribe
     subs: Subscription[] = [];
-
+    
     sidebarItems = [
         { label: 'Home', url: 'screen/home', iconClass: 'eui-icon-home' },
+
     ];
     notificationItems = [
         { label: 'Title label 1', subLabel: 'Subtitle label' },
@@ -25,15 +29,33 @@ export class AppComponent implements OnDestroy {
         { label: 'Title label 4', subLabel: 'Subtitle label' },
     ];
 
-    constructor(private store: Store<any>,protected i18nService: I18nService,) {
+    constructor(private store: Store<any>,protected i18nService: I18nService,private apiQueue: ApiQueueService,
+    ) {
         this.userState = <any>this.store.select(getUserState);
         this.subs.push(this.userState.subscribe((user: UserState) => {
             this.userInfos = { ...user };
         }));
         this.i18nService.init();
     }
+    ngOnInit() {
+        // console.log(this.apiQueue.getQueue(),"getqueue");
+        // this.apiQueue.addQueueItem('item',{uri : "http://test",method : 'GET'})
+
+    }
+
 
     ngOnDestroy() {
         this.subs.forEach((s: Subscription) => s.unsubscribe());
+    }
+
+    //Trigger this asction from views
+    addApiQueue(){
+        console.log('testing')
+        this.apiQueue.addQueueItem('item',{uri:'http://localhost:4200/api/user-details',method: 'GET'});
+    }
+    removeApiQueue()
+    {
+        this.apiQueue.removeQueueItem('item');
+
     }
 }
